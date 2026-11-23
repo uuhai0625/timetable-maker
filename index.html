@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<script>
+  (function() {
+    var GA_ID = 'G-7645CD9VTK';
+    var isLocalDev = ['localhost', '127.0.0.1', ''].includes(location.hostname);
+    if (isLocalDev) return;
+    try { if (/[?&]no_ga=0/.test(location.search)) localStorage.removeItem('no_ga'); if (/[?&]no_ga=1/.test(location.search)) localStorage.setItem('no_ga', '1'); if (localStorage.getItem('no_ga') === '1') return; } catch (e) {}
+    var gaQ = new URLSearchParams(location.search); if (gaQ.get('obs') === '1' || gaQ.get('no_ga') === '1') return;
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', GA_ID);
+    document.addEventListener('click', function(e) {
+      var a = e.target && e.target.closest ? e.target.closest('a[href*="booth.pm"]:not([href*="/search"])') : null;
+      if (!a) return;
+      gtag('event', 'booth_click', { link_url: a.href, link_id: a.id || '', link_text: (a.textContent || '').trim().slice(0, 40) });
+    });
+  })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="ライブ・対バン・イベントのタイムテーブルを無料で作成(登録不要)。出演順と持ち時間を入れるだけで、転換の時間も入れて時刻を自動計算。2ステージの時間割(表の形式)も作れて、SNS用の画像(PNG)とA4印刷に。ライブハウス・アイドルの対バン・DJイベント・発表会に。">
+<link rel="canonical" href="https://uuhai0625.github.io/timetable-maker/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="タイムテーブルメーカー|ライブ・対バン・イベントのタイムテーブルを無料で作成・画像保存">
+<meta property="og:description" content="ライブ・対バン・イベントのタイムテーブルを無料で作成(登録不要)。出演順と持ち時間を入れるだけで、転換の時間も入れて時刻を自動計算。2ステージの時間割(表の形式)も作れて、SNS用の画像(PNG)とA4印刷に。ライブハウス・アイドルの対バン・DJイベント・発表会に。">
+<meta property="og:url" content="https://uuhai0625.github.io/timetable-maker/">
+<meta property="og:image" content="https://uuhai0625.github.io/timetable-maker/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<title>タイムテーブルメーカー|ライブ・対バン・イベントのタイムテーブルを無料で作成・画像保存</title>
+<style>
+  :root {
+    --bg: #f4f3f8;
+    --panel: #ffffff;
+    --border: #dddbe8;
+    --field-border: #6c6a80;
+    --text: #222033;
+    --muted: #55536a;
+    --accent: #5b3fa8;
+    --accent-dark: #3d2878;
+    --ng: #b3261e;
+    --locked: #c4bdd9;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+  header { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: #fff; padding: 24px 20px 18px; text-align: center; }
+  header h1 { margin: 0 0 6px; font-size: 1.35rem; }
+  header p { margin: 0; font-size: .9rem; }
+  main { max-width: 1040px; margin: 0 auto; padding: 22px 16px 50px; }
+  main > * { min-width: 0; }
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  .layout > div { min-width: 0; }
+  .layout > .col-pv { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow-y: auto; }
+  section.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.card h2 { margin: 0 0 6px; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .desc { color: var(--muted); font-size: .84rem; margin: 0 0 12px; }
+  .fine { color: var(--muted); font-size: .8rem; margin: 8px 0 0; }
+  .badge { display: inline-block; font-size: .7rem; padding: 2px 8px; border-radius: 999px; background: #fff1cc; color: #7a5600; font-weight: bold; }
+  .hidden { display: none !important; }
+  label.field { display: block; margin-bottom: 12px; }
+  .lbl { font-size: .85rem; font-weight: bold; display: block; }
+  .hint { font-size: .78rem; color: var(--muted); font-weight: normal; display: block; margin-top: 2px; }
+  input[type=text], input[type=number], input[type=time], input[type=date], select { width: 100%; margin-top: 5px; padding: 8px 10px; min-height: 44px; border: 1px solid var(--field-border); border-radius: 8px; font-size: 1rem; font-family: inherit; background: #fff; color: var(--text); }
+  input[type=file] { margin-top: 5px; min-height: 44px; font-size: .9rem; max-width: 100%; }
+  .row2 { display: flex; gap: 12px; }
+  .row2 > * { flex: 1; min-width: 0; }
+  .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .btn { min-height: 44px; padding: 9px 16px; border-radius: 8px; font-size: .88rem; cursor: pointer; border: 1px solid var(--field-border); background: #fff; color: var(--text); font-family: inherit; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: bold; }
+  .btn.small { min-width: 44px; padding: 6px 8px; }
+  .btn.link { border: 0; background: none; color: var(--muted); text-decoration: underline; padding: 6px 0; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent-dark); outline-offset: 2px; }
+  .btn-row .btn { flex: 1; }
+  .status { font-size: .82rem; color: var(--muted); margin-top: 6px; min-height: 1.2em; }
+  .status.err, .err { color: var(--ng); font-weight: bold; }
+  .stage { border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 12px; background: #fbfaff; }
+  .stage-head { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+  .stage-head .field { flex: 1; min-width: 120px; margin-bottom: 8px; }
+  .items { list-style: none; margin: 4px 0 0; padding: 0; }
+  .item { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px 0; border-top: 1px dashed var(--border); }
+  .item .t { font-size: .8rem; color: var(--muted); width: 100%; font-variant-numeric: tabular-nums; }
+  .item .t b { color: var(--text); }
+  .item > input[type=text] { flex: 1 1 150px; margin-top: 0; }
+  .item .mins { display: flex; align-items: center; gap: 4px; font-size: .84rem; }
+  .item .mins input { width: 76px; margin-top: 0; }
+  .item details { width: 100%; font-size: .82rem; }
+  .item summary { cursor: pointer; color: var(--muted); min-height: 32px; display: flex; align-items: center; }
+  .item details .row2 { margin-top: 4px; }
+  .item details label { display: block; }
+  .preview { border: 1px solid var(--border); border-radius: 8px; background: #e6e4ee; padding: 12px; text-align: center; }
+  .preview img { max-width: 100%; max-height: 70vh; height: auto; box-shadow: 0 2px 10px rgba(0,0,0,.18); background: #fff; }
+  .info { font-size: .84rem; margin-top: 8px; }
+  .warn { font-size: .84rem; margin-top: 8px; padding: 8px 10px; border-radius: 8px; background: #fff4e0; border: 1px solid #e6b45c; color: #5c3b00; }
+  .warn:empty { display: none; }
+  .jump { display: none; font-size: .86rem; color: var(--accent-dark); }
+  .guide { font-size: .86rem; }
+  .guide ul, .guide ol { padding-left: 1.3em; margin: 6px 0; }
+  .guide li { margin: 4px 0; }
+  .locked-panel { border: 1px dashed var(--locked); border-radius: 10px; padding: 16px; text-align: center; color: var(--muted); background: #faf9fd; }
+  .locked-panel .lead { color: var(--text); font-weight: bold; }
+  .locked-panel .feat-list { text-align: left; max-width: 600px; margin: 10px auto; font-size: .85rem; padding-left: 1.2em; }
+  .buy-btn { display: inline-block; margin-top: 8px; background: var(--accent-dark); color: #fff; font-weight: bold; padding: 11px 22px; border-radius: 999px; text-decoration: none; font-size: .9rem; }
+  footer { max-width: 1040px; margin: 0 auto; padding: 0 16px 40px; font-size: .8rem; color: var(--muted); }
+  footer a { color: var(--muted); display: inline-block; padding: 10px 0; }
+  #printArea img { display: block; width: 210mm; height: 297mm; }
+  @media screen { #printArea { display: none; } }
+  @media print {
+    @page { size: A4 portrait; margin: 0; }
+    body { background: #fff; }
+    body > *:not(#printArea) { display: none !important; }
+  }
+  @media (max-width: 820px) {
+    .layout { grid-template-columns: minmax(0, 1fr); }
+    .layout > .col-pv { position: static; max-height: none; overflow: visible; }
+    .jump { display: inline-block; padding: 10px 0; }
+  }
+  @media (max-width: 600px) {
+    .row2 { flex-direction: column; gap: 0; }
+    section.card { padding: 16px 14px; }
+    .item > input[type=text] { flex-basis: 100%; }
+  }
+</style>
+<!--ANSHIN_CSS_START--><style>:root{--anshin-w:1008px;--anshin-pad:16px}.anshin-strip,.anshin{box-sizing:border-box;width:min(var(--anshin-w),calc(100% - 2 * var(--anshin-pad)));margin-left:auto;margin-right:auto}.anshin-strip{list-style:none;margin-top:10px;margin-bottom:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;font-size:.8rem;line-height:1.5}.anshin-strip li{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border:1px solid rgba(20,120,90,.45);border-radius:999px;background:rgba(20,120,90,.07)}.anshin-strip li.anshin-more{border:0;background:none;padding:3px 2px}.anshin-strip a,.anshin a{color:inherit}.anshin{margin-top:18px;margin-bottom:18px;padding:14px 18px;border:1px solid rgba(20,120,90,.45);border-radius:10px;background:rgba(20,120,90,.05);font-size:.86rem;line-height:1.7}.anshin h2{font-size:1rem;margin:0 0 6px}.anshin p{margin:0 0 6px}.anshin ul{margin:0;padding-left:1.2em}.anshin li{margin:3px 0}.anshin details{margin-top:6px}.anshin summary{cursor:pointer;font-weight:bold}.anshin .anshin-meta{margin:8px 0 0;font-size:.8rem;opacity:.85}@media print{.anshin,.anshin-strip{display:none!important}}</style><!--ANSHIN_CSS_END-->
+<!--UPSELL_CSS_START--><style>.upsell-top{box-sizing:border-box;width:min(var(--anshin-w,880px),calc(100% - 2 * var(--anshin-pad,16px)));margin:12px auto 0;font-size:.85rem;line-height:1.6}.upsell-top a{color:inherit}.upsell-assure{list-style:none;margin:12px 0 10px;padding:0;display:flex;flex-wrap:wrap;gap:6px 8px;font-size:.8rem;line-height:1.5}.upsell-assure li{padding:3px 10px;border:1px solid rgba(20,120,90,.45);border-radius:12px;background:rgba(20,120,90,.06)}.upsell-terms{margin:8px 0 0;font-size:.78rem;line-height:1.6;opacity:.85}.upsell-toast{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:9999;box-sizing:border-box;width:min(520px,calc(100% - 24px));padding:14px 56px 14px 16px;border-radius:12px;background:#fff;color:#222;border:1px solid #c9c2d6;box-shadow:0 6px 24px rgba(0,0,0,.18);font-size:.88rem;line-height:1.6}.upsell-toast p{margin:0 0 6px;font-weight:bold}.upsell-toast ul{margin:0 0 10px;padding-left:1.2em}.upsell-toast li{margin:2px 0}.upsell-toast .upsell-note{display:block;margin-top:6px;font-size:.75rem;color:#555}.upsell-toast .upsell-go{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:8px;background:#c9283e;color:#fff;font-weight:bold;text-decoration:none}.upsell-toast.upsell-calm .upsell-go{background:#3f4a63}.upsell-toast .upsell-go:focus-visible,.upsell-toast .upsell-x:focus-visible{outline:3px solid #2560c4;outline-offset:2px}.upsell-toast .upsell-x{position:absolute;top:4px;right:4px;width:44px;height:44px;border:0;border-radius:8px;background:transparent;color:#555;font-size:1.3rem;line-height:1;cursor:pointer}.upsell-inline{white-space:nowrap;color:inherit;text-decoration:underline;text-underline-offset:2px}@media print{.upsell-top,.upsell-assure,.upsell-terms,.upsell-toast,.upsell-inline{display:none!important}}</style><!--UPSELL_CSS_END-->
+<!--JSONLD_START--><script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"タイムテーブルメーカー(無料のタイムテーブル作成ツール)","url":"https://uuhai0625.github.io/timetable-maker/","description":"ライブ・対バン・イベントのタイムテーブルを無料で作成(登録不要)。出演順と持ち時間を入れるだけで、転換の時間も入れて時刻を自動計算。2ステージの時間割(表の形式)も作れて、SNS用の画像(PNG)とA4印刷に。ライブハウス・アイドルの対バン・DJイベント・発表会に。","applicationCategory":"UtilitiesApplication","operatingSystem":"Web","inLanguage":"ja","offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"},"author":{"@type":"Person","name":"uuhai0625","url":"https://uuhai0625.github.io/"}}</script><!--JSONLD_END-->
+</head>
+<body>
+
+<header>
+  <h1>タイムテーブルメーカー(無料のタイムテーブル作成ツール)</h1>
+  <p>出演順と持ち時間・転換の時間を入れるだけで、時刻を自動で計算して、ライブ・対バン・イベントのタイムテーブル画像を作ります。SNS用の画像保存とA4印刷に。登録不要・ブラウザだけで使えます</p>
+</header>
+<!--ANSHIN_STRIP_START-->
+<ul class="anshin-strip" aria-label="データの扱い">
+  <li><span aria-hidden="true">✓</span> 入力内容はこの端末の中だけで処理</li>
+  <li><span aria-hidden="true">✓</span> 登録・ログイン不要</li>
+  <li><span aria-hidden="true">✓</span> 仕組みを公開中</li>
+  <li class="anshin-more"><a href="#anshin">データの扱いをくわしく</a></li>
+</ul>
+<!--ANSHIN_STRIP_END-->
+<!--UPSELL_TOP_START--><p class="upsell-top no-print" id="upsellTop">このページは無料のまま使えます。機能を増やしたい方は <a href="#pro-section">買い切り版(¥100・1回払い)<span aria-hidden="true"> ↓</span></a></p><!--UPSELL_TOP_END-->
+
+<main>
+<div class="layout">
+<div>
+
+  <section class="card" id="event-card">
+    <h2>① イベントの情報</h2>
+    <label class="field">
+      <span class="lbl">イベント名</span>
+      <input type="text" id="in-title" maxlength="30" value="" placeholder="例: 冬の対バン企画 vol.3" data-save>
+    </label>
+    <div class="row2">
+      <label class="field">
+        <span class="lbl">日付</span>
+        <input type="date" id="in-date" value="" data-save>
+      </label>
+      <label class="field">
+        <span class="lbl">会場</span>
+        <input type="text" id="in-venue" maxlength="24" value="" placeholder="例: 下北沢〇〇" data-save>
+      </label>
+    </div>
+    <div class="row2">
+      <label class="field">
+        <span class="lbl">開場(OPEN)</span>
+        <input type="time" id="in-open" value="18:00" data-save>
+        <span class="hint">空にすると載せません</span>
+      </label>
+      <label class="field">
+        <span class="lbl">転換の時間(分・共通)</span>
+        <input type="number" id="in-gap" min="0" max="120" step="1" value="10" inputmode="numeric" data-save>
+        <span class="hint">出番と出番のあいだに空ける時間。行ごとに変えることもできます</span>
+      </label>
+    </div>
+    <label class="field">
+      <span class="lbl">下に入れる文字</span>
+      <input type="text" id="in-note" maxlength="60" value="" placeholder="例: 前売 2,500円 / 当日 3,000円(+1D 600円)" data-save>
+    </label>
+    <button class="btn link" type="button" id="resetAll">入力を全部消す</button>
+    <a class="jump" href="#result-card">見本を見る ↓</a>
+  </section>
+
+  <section class="card" id="tt-card">
+    <h2>② 出演順と持ち時間</h2>
+    <p class="desc">いちばん上の「開演」の時刻から、上から順に出演者や「休憩」「特典会」などを入れます。時刻は持ち時間と転換から自動で計算します。行ごとの「転換・時刻の指定」で、転換なし(0分)や「この時刻から」も決められます。</p>
+    <div id="stages"></div>
+    <div class="status" id="itemSt" role="status"></div>
+    <div class="btn-row"><button class="btn" type="button" id="addStage">＋ ステージを足す</button></div>
+    <a class="jump" href="#result-card">見本を見る ↓</a>
+  </section>
+
+  <section class="card" id="look-card">
+    <h2>③ デザインと大きさ</h2>
+    <div class="row2">
+      <label class="field">
+        <span class="lbl">形式</span>
+        <select id="in-style" data-save>
+          <option value="list" selected>リスト(上から順に)</option>
+          <option value="grid">表(ステージを横に並べた時間割)</option>
+        </select>
+      </label>
+      <label class="field">
+        <span class="lbl">時刻の出し方</span>
+        <select id="in-timefmt" data-save>
+          <option value="range" selected>18:30〜19:00</option>
+          <option value="start">18:30(始まりだけ)</option>
+        </select>
+      </label>
+    </div>
+    <div class="row2">
+      <label class="field">
+        <span class="lbl">色</span>
+        <select id="in-theme" data-save>
+          <option value="night" selected>ナイト(黒×ピンク)</option>
+          <option value="white">ホワイト(白×青)</option>
+          <option value="pop">ポップ(黄×赤)</option>
+          <option value="pastel">パステル(ピンク)</option>
+          
+        </select>
+      </label>
+      <label class="field">
+        <span class="lbl">大きさ</span>
+        <select id="in-size" data-save>
+          <option value="post" selected>SNS 縦長 4:5(1080×1350・Instagram/X)</option>
+          <option value="tall">SNS 縦長 3:4(1080×1440・Instagram)</option>
+          <option value="square">SNS 正方形(1080×1080)</option>
+          <option value="story">ストーリーズ(1080×1920・Xには不向き)</option>
+          <option value="a4">A4 縦(印刷・掲示用)</option>
+        </select>
+      </label>
+    </div>
+    
+  </section>
+
+</div>
+<div class="col-pv">
+  <section class="card" id="result-card">
+    <h2>④ 見本と保存</h2>
+    <div class="preview"><img id="pvImg" alt="タイムテーブルの見本"></div>
+    <div class="warn" id="warn"></div>
+    <div class="info" id="info"></div>
+    <div class="btn-row">
+      <button class="btn primary" type="button" id="saveBtn">画像を保存(PNG)</button>
+      <button class="btn" type="button" id="printBtn">A4で印刷する</button>
+    </div>
+    <div class="status" id="st" role="status"></div>
+    <ul class="fine" style="padding-left:1.2em;">
+      <li>スマホは、見本の画像を長押しすると写真に保存できます。</li>
+      <li>印刷はA4縦です。印刷画面で倍率を100%(または「用紙に合わせる」)にしてください。PDFにしたいときは、プリンターの選択で「PDFに保存」を選びます。</li>
+    </ul>
+  </section>
+</div>
+</div>
+
+  <section class="card" id="pro-section">
+    <h2>ステージ4つ・40組・フライヤーの背景も <span class="badge">買い切り版 ¥100(税込)</span></h2>
+    <div class="locked-panel">
+      <p class="lead">フェス・サーキットの時間割や、出演の多いアイドルの対バンに。</p>
+      <p>このページの機能は無料でそのまま使えます(ステージ2つ・1ステージ10個まで)。買い切り版(ダウンロード購入)では、次の機能が増えます:</p>
+      <ul class="feat-list">
+        <li><strong>ステージを4つまで</strong>: メイン・サブ・2会場・特典会の列などを並べられます(無料版は2つまで)</li>
+        <li><strong>1ステージ40個まで</strong>(無料版は10個まで。出演の多い対バン・長いイベント・オールナイトに)</li>
+        <li><strong>背景に写真・フライヤーの画像</strong>: 文字が読めるように色を重ねます。画像はパソコンの中だけで使います</li>
+        <li><strong>好きな差し色</strong>(イベントのテーマカラーに)</li>
+        <li><strong>パソコンで使うHTMLファイルです</strong>(スマホでの動作は保証していません。スマホの方は、このページの無料版をお使いください)。ダブルクリックで開くだけ、ネットにつながっていなくても使えます</li>
+      </ul>
+<!--UPSELL_ASSURE_START--><ul class="upsell-assure" aria-label="買い切り版について"><li>¥100(税込)の1回払い・月額なし</li><li>パソコン向けのHTMLファイル(スマホでは開けない機種あり)</li><li>ネットにつながっていなくても動く</li><li>BOOTHで購入(クレジットカード・楽天ペイは手数料なし、コンビニ・銀行払いは別途手数料)</li></ul><!--UPSELL_ASSURE_END-->
+      <a class="buy-btn" href="https://uuhai0625.booth.pm/items/9210649" id="buyLink" target="_blank" rel="noopener">買い切り版を見る(BOOTH・新しいタブ)</a><!--UPSELL_TERMS_START--><p class="upsell-terms">販売者の情報・返品などの販売条件は、BOOTHの商品ページでご確認ください。BOOTHでの購入にはpixivのアカウントが必要です。</p><!--UPSELL_TERMS_END-->
+    </div>
+  </section>
+
+  <section class="card guide" id="guide">
+    <h2>タイムテーブルの作り方</h2>
+    <ol>
+      <li>①でイベント名・日付・会場・開場の時刻と、出番のあいだの転換の時間を入れます。</li>
+      <li>②のいちばん上に開演の時刻を入れ、出演順に名前と持ち時間(分)を入れます。「休憩」「特典会」なども1行として入れられます。順番は↑↓で入れ替えます。</li>
+      <li>休憩・特典会の前は転換がいらない、決まった時刻に始まる出番がある、というときは、その行の「転換・時刻の指定」を開いて決めます。</li>
+      <li>③で形式・色・大きさを選び、「画像を保存」でSNS用の画像に、「A4で印刷する」で会場に貼る紙にします。</li>
+    </ol>
+    <h2 style="margin-top:16px;">タイムテーブルのよくある疑問</h2>
+    <ul>
+      <li><strong>転換の時間は何分くらい?</strong> バンドの対バンでは10分前後(5〜15分)が目安です。会場やブッキングの決まりがあれば、そちらに合わせてください。音源で歌うアイドルの対バンやDJイベントは、0〜5分のことも多いです。</li>
+      <li><strong>24時を過ぎるイベントは?</strong> 25:00、26:00のように24時から続けて表示します(深夜のイベントの書き方)。開演が0時を過ぎる場合も、開場や1つ目のステージより後なら翌日として続けて計算します(例: 開場23:30・開演0:30→24:30)。</li>
+      <li><strong>途中で時間が決まっている出番がある</strong>: その行の「転換・時刻の指定」で「この時刻から」を入れると、その時刻から始めて、後ろの行もそこから計算し直します。前の出番と重なるときは注意を出します。</li>
+      <li><strong>入れた内容は?</strong> このブラウザの中だけで処理し、どこにも送信しません。次に開いたときのために、このブラウザに入力内容を残します(画像は残しません)。共用のパソコンでは、使い終わったら「入力を全部消す」を押してください。</li>
+    </ul>
+  </section>
+
+</main>
+
+<!--ANSHIN_START-->
+<section class="anshin" id="anshin" aria-labelledby="anshin-title">
+  <h2 id="anshin-title">データの扱いについて</h2>
+  <p>このページには、入力した内容を受け取る仕組みがありません。入力した文字や数字は、あなたのスマホやパソコンの中だけで処理されます。</p>
+  <ul>
+    <li>会員登録・ログイン・メールアドレスの入力はありません。</li>
+    <li>自分で確かめたい方へ: ページを開いたあと機内モードにしても、そのまま使えます。</li>
+  </ul>
+  <details>
+    <summary>もっとくわしく(保存・アクセス解析・公開について)</summary>
+    <ul>
+      <li>保存されるデータは、この端末のこのブラウザの中にだけ残ります(localStorage・sessionStorage)。共用のパソコンでは使い終わったら消してください。</li>
+      <li>アクセス解析(Google Analytics)のため、見たページのURL・参照元・端末やブラウザの種類・おおよその地域(IPアドレスから推定)・Cookieの識別子・BOOTHへのリンクのクリック・どのボタンを押したか(回数や選んだ設定を含む)がGoogleに送られます。目的は利用状況の把握です。入力した文字や画像は送りません。(<a href="https://policies.google.com/technologies/partner-sites?hl=ja" target="_blank" rel="noopener">Googleによるデータの使用</a>/<a href="https://tools.google.com/dlpage/gaoptout?hl=ja" target="_blank" rel="noopener">計測を止めるアドオン</a>。止めてもツールはそのまま使えます)</li>
+      <li>このツールの結果や作成物は目安です。入稿・契約・販売などの前には、印刷所や公式の情報でご確認ください。</li>
+      <li>処理の中身はすべて公開しています(詳しい方向け: <a href="https://github.com/uuhai0625/timetable-maker" target="_blank" rel="noopener">GitHub</a>)。</li>
+    </ul>
+  </details>
+  <p class="anshin-meta">作っている人: ウーハイ(個人開発)/不具合・ご質問は<a href="https://x.com/uuhai0625" target="_blank" rel="noopener">X(@uuhai0625)</a>へ/<a href="https://uuhai0625.github.io/" target="_blank" rel="noopener">ほかのツール</a>/この説明の更新日: 2026-10-13</p>
+</section>
+<!--ANSHIN_END-->
+
+<footer>
+  <p id="privacyNote">本ツールは完全にブラウザ内で動作し、入力した内容はどこにも送信されません。</p>
+  <p><a href="https://uuhai0625.booth.pm/" target="_blank" rel="noopener">他のツールも見る(BOOTHショップ)</a></p>
+  <p>不具合・ご要望は X <a href="https://x.com/uuhai0625" target="_blank" rel="noopener">@uuhai0625</a> まで。</p>
+  <p class="related-tools no-print">関連する無料ツール: <a href="https://uuhai0625.github.io/vtuber-schedule/" target="_blank" rel="noopener">配信スケジュールメーカー</a> ・ <a href="https://uuhai0625.github.io/seiriken-maker/" target="_blank" rel="noopener">整理券・番号札メーカー</a> ・ <a href="https://uuhai0625.github.io/tournament-hyo/" target="_blank" rel="noopener">トーナメント表作成ツール</a> ・ <a href="https://uuhai0625.github.io/#free-tools">ツール一覧</a></p>
+</footer>
+
+<div id="printArea"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var EDITION = "free"; // "full" で買い切り完全版
+
+  function track(name, params) {
+    if (!window.dataLayer) return;
+    (function () { window.dataLayer.push(arguments); })("event", name, params || {});
+  }
+  var $ = function (id) { return document.getElementById(id); };
+  function el(tag, attrs, text) {
+    var e = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) { if (k === "class") e.className = attrs[k]; else e.setAttribute(k, attrs[k]); });
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function setSt(id, msg, err) { var e = $(id); e.textContent = msg; e.classList.toggle("err", !!err); }
+
+  var LAST_KEY = "timetable_last_v1";
+  var MAX_STAGES = 2, MAX_ITEMS = 10, NAME_MAX = 30;
+  var SIZES = { post: [1080, 1350], tall: [1080, 1440], square: [1080, 1080], story: [1080, 1920], a4: [1654, 2339] };
+  var THEMES = {
+    night:  { bg: "#121319", fg: "#ffffff", sub: "#b9bdcc", accent: "#ff4f8b", band: "#1f2027", line: "rgba(255,255,255,.18)" },
+    white:  { bg: "#ffffff", fg: "#1d2433", sub: "#5b6475", accent: "#2f5fd0", band: "#eef2fa", line: "rgba(0,0,0,.14)" },
+    pop:    { bg: "#ffe14d", fg: "#1b1b1b", sub: "#433f2a", accent: "#b8241a", band: "#ecd047", line: "rgba(0,0,0,.2)" },
+    pastel: { bg: "#fdf0f4", fg: "#3b2a33", sub: "#6b5562", accent: "#b0446f", band: "#f8dfe8", line: "rgba(0,0,0,.12)" }
+  };
+  var FONT = '"Hiragino Kaku Gothic ProN", "Yu Gothic", "YuGothic", "Meiryo", sans-serif';
+
+  // 買い切り版で差し替えるフック(無料版では何もしない)
+  var extendSettings = function (s) { return s; };
+  var syncExtra = function () {};
+
+  // ===== 出演順(ステージごと) =====
+  // 行: n=名前, m=持ち時間(分), g=この行の前の転換(null=共通), at=この時刻から(""=自動)
+  function defaultStages() {
+    return [{ name: "", start: "18:30", items: [{ n: "出演者A", m: 30, g: null, at: "" }, { n: "出演者B", m: 30, g: null, at: "" }, { n: "出演者C", m: 30, g: null, at: "" }, { n: "出演者D", m: 40, g: null, at: "" }] }];
+  }
+  var stages = defaultStages();
+
+  function oneLine(v, n) { return Array.from(String(v || "").replace(/\s+/g, " ").trim()).slice(0, n).join(""); }
+  function clampInt(v, def, min, max) {
+    if (v === "" || v == null) return def;
+    v = Math.round(Number(v)); if (!isFinite(v)) v = def;
+    return Math.max(min, Math.min(max, v));
+  }
+  function parseTime(v) { var m = /^(\d{2}):(\d{2})$/.exec(typeof v === "string" ? v : ""); if (!m) return null; var h = +m[1], mi = +m[2]; if (h > 23 || mi > 59) return null; return h * 60 + mi; }
+  function fmt(t) { var h = Math.floor(t / 60), m = t % 60; return h + ":" + (m < 10 ? "0" : "") + m; }
+  function hhmm(t) { t = ((t % 1440) + 1440) % 1440; var h = Math.floor(t / 60), m = t % 60; return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m; }
+
+  function cleanStages(raw) {
+    if (!Array.isArray(raw) || !raw.length) return defaultStages();
+    return raw.slice(0, MAX_STAGES).map(function (st) {
+      st = st && typeof st === "object" ? st : {};
+      var items = Array.isArray(st.items) ? st.items : [];
+      var t = parseTime(st.start);
+      return {
+        name: oneLine(st.name, 16),
+        start: t != null ? hhmm(t) : "18:30",
+        items: items.slice(0, MAX_ITEMS).map(function (it) {
+          it = it && typeof it === "object" ? it : {};
+          var at = parseTime(it.at);
+          return { n: oneLine(it.n, NAME_MAX), m: clampInt(it.m, 30, 1, 600), g: it.g === null || it.g === undefined || it.g === "" ? null : clampInt(it.g, 0, 0, 120), at: at != null ? hhmm(at) : "" };
+        })
+      };
+    });
+  }
+
+  // 日をまたぐ時刻: 基準より12時間以上前なら翌日として扱う
+  function after(t, ref) { while (t < ref - 720) t += 1440; return t; }
+  function baseTime() {
+    var open = parseTime($("in-open").value), s0 = parseTime(stages[0] && stages[0].start);
+    if (s0 == null) s0 = 18 * 60 + 30;
+    return open != null ? after(s0, open) : s0;
+  }
+  // 時刻を計算。warn には重なりなどの注意を入れる
+  function schedule(st, gap, base, warn, si) {
+    var t = parseTime(st.start), out = [];
+    if (t == null) t = 18 * 60 + 30;
+    t = after(t, base);
+    st.items.forEach(function (it, i) {
+      var g = i > 0 ? (it.g == null ? gap : it.g) : 0;
+      var auto = t + g, s = auto;
+      var at = parseTime(it.at);
+      if (at != null) {
+        s = after(at, t - 1);
+        if (s < t && warn) warn.push((stages.length > 1 ? (si + 1) + "つ目のステージの" : "") + (i + 1) + "行目の「この時刻から」(" + fmt(s) + ")が、前の出番の終わり(" + fmt(t) + ")より前です。");
+      }
+      out.push({ n: it.n, s: s, e: s + it.m, g: g, fixed: at != null });
+      t = s + it.m;
+    });
+    return out;
+  }
+
+  // ===== 入力欄(出演順)を作る =====
+  function stagesUi(focus) {
+    var box = $("stages");
+    box.innerHTML = "";
+    stages.forEach(function (st, si) {
+      var wrap = el("div", { class: "stage" });
+      var head = el("div", { class: "stage-head" });
+      if (stages.length > 1) {
+        var ln = el("label", { class: "field" }); ln.appendChild(el("span", { class: "lbl" }, "ステージ名"));
+        var nm = el("input", { type: "text", maxlength: "16", placeholder: "例: MAIN STAGE" }); nm.value = st.name;
+        nm.addEventListener("input", function () { st.name = oneLine(nm.value, 16); changed(); });
+        ln.appendChild(nm); head.appendChild(ln);
+      }
+      var ls = el("label", { class: "field" }); ls.appendChild(el("span", { class: "lbl" }, "開演(START)"));
+      var sv = el("input", { type: "time" }); sv.value = st.start;
+      sv.addEventListener("input", function () { if (parseTime(sv.value) != null) { st.start = sv.value; changed(); } });
+      sv.addEventListener("change", function () { if (parseTime(sv.value) == null) sv.value = st.start; });
+      ls.appendChild(sv); head.appendChild(ls);
+      if (stages.length > 1) {
+        var rm = el("button", { class: "btn", type: "button", "aria-label": (si + 1) + "つ目のステージを消す" }, "このステージを消す");
+        rm.style.marginBottom = "8px";
+        rm.addEventListener("click", function () { stages.splice(si, 1); stagesUi(); changed(); $("addStage").focus(); });
+        head.appendChild(rm);
+      }
+      wrap.appendChild(head);
+      var ul = el("ul", { class: "items" });
+      st.items.forEach(function (it, ii) {
+        var li = el("li", { class: "item" });
+        li.appendChild(el("span", { class: "t", "data-t": si + "-" + ii }));
+        var n = el("input", { type: "text", maxlength: String(NAME_MAX), "aria-label": (ii + 1) + "番目の名前", placeholder: "名前・休憩など" }); n.value = it.n;
+        n.addEventListener("input", function () { it.n = oneLine(n.value, NAME_MAX); changed(); });
+        li.appendChild(n);
+        var mw = el("span", { class: "mins" });
+        var m = el("input", { type: "number", min: "1", max: "600", step: "1", inputmode: "numeric", "aria-label": (ii + 1) + "番目の持ち時間(分)" }); m.value = it.m;
+        m.addEventListener("input", function () { if (String(m.value).trim() !== "") { it.m = clampInt(m.value, it.m, 1, 600); changed(); } });
+        m.addEventListener("change", function () { it.m = clampInt(m.value, it.m, 1, 600); m.value = it.m; changed(); });
+        mw.appendChild(m); mw.appendChild(document.createTextNode("分"));
+        li.appendChild(mw);
+        [["↑", -1, "上へ"], ["↓", 1, "下へ"]].forEach(function (b, bi) {
+          var bt = el("button", { class: "btn small", type: "button", "aria-label": (ii + 1) + "番目(" + (it.n || "名前なし") + ")を" + b[2] }, b[0]);
+          var to = ii + b[1];
+          bt.disabled = to < 0 || to >= st.items.length;
+          bt.addEventListener("click", function () { var x = st.items.splice(ii, 1)[0]; st.items.splice(to, 0, x); stagesUi({ si: si, ii: to, btn: bi }); changed(); });
+          li.appendChild(bt);
+        });
+        var del = el("button", { class: "btn small", type: "button", "aria-label": (ii + 1) + "番目(" + (it.n || "名前なし") + ")を消す" }, "×");
+        del.addEventListener("click", function () { st.items.splice(ii, 1); stagesUi(st.items.length ? { si: si, ii: Math.min(ii, st.items.length - 1) } : { si: si, add: true }); changed(); });
+        li.appendChild(del);
+        // 転換・時刻の指定
+        var dt = el("details"); if (it.g != null || it.at) dt.open = true;
+        dt.appendChild(el("summary", null, "転換・時刻の指定" + (it.g != null || it.at ? "(指定あり)" : "")));
+        var r2 = el("div", { class: "row2" });
+        if (ii > 0) {
+          var lg = el("label"); lg.appendChild(el("span", { class: "hint" }, "この行の前の転換(分・空なら共通)"));
+          var gi = el("input", { type: "number", min: "0", max: "120", step: "1", inputmode: "numeric", placeholder: "共通" }); gi.value = it.g == null ? "" : it.g;
+          gi.addEventListener("input", function () { it.g = String(gi.value).trim() === "" ? null : clampInt(gi.value, 0, 0, 120); changed(); });
+          gi.addEventListener("change", function () { gi.value = it.g == null ? "" : it.g; });
+          lg.appendChild(gi); r2.appendChild(lg);
+        }
+        var la = el("label"); la.appendChild(el("span", { class: "hint" }, "この時刻から始める(空なら自動)"));
+        var ai = el("input", { type: "time" }); ai.value = it.at;
+        ai.addEventListener("input", function () { it.at = parseTime(ai.value) != null ? ai.value : ""; changed(); });
+        la.appendChild(ai); r2.appendChild(la);
+        dt.appendChild(r2); li.appendChild(dt);
+        ul.appendChild(li);
+      });
+      wrap.appendChild(ul);
+      var add = el("button", { class: "btn", type: "button", "data-add": String(si) }, "＋ 1行ふやす");
+      add.style.marginTop = "6px";
+      add.addEventListener("click", function () {
+        if (st.items.length >= MAX_ITEMS) {
+          setSt("itemSt", EDITION === "full" ? "1ステージ" + MAX_ITEMS + "個までです。" : "無料版は1ステージ" + MAX_ITEMS + "個までです。買い切り版なら40個まで、ステージも4つまで並べられます。", true);
+          return;
+        }
+        setSt("itemSt", "");
+        st.items.push({ n: "", m: 30, g: null, at: "" }); stagesUi({ si: si, ii: st.items.length - 1 }); changed();
+      });
+      wrap.appendChild(add);
+      box.appendChild(wrap);
+    });
+    refreshTimes();
+    $("addStage").disabled = false;
+    if (focus) {
+      var f = box.querySelectorAll(".stage")[focus.si], target = null;
+      if (f && focus.add) target = f.querySelector("[data-add]");
+      else if (f) {
+        var row = f.querySelectorAll(".item")[focus.ii];
+        if (row) {
+          if (focus.btn != null) { var bs = row.querySelectorAll(".btn.small"); target = bs[focus.btn].disabled ? bs[1 - focus.btn] : bs[focus.btn]; }
+          else target = row.querySelector("input[type=text]");
+        }
+      }
+      if (target) target.focus();
+    }
+  }
+  // 時刻の表示だけ更新(入力中のフォーカスを外さない)
+  function refreshTimes() {
+    var gap = clampInt($("in-gap").value, 10, 0, 120), base = baseTime();
+    stages.forEach(function (st, si) {
+      schedule(st, gap, base, null, si).forEach(function (x, ii) {
+        var e = $("stages").querySelector('[data-t="' + si + "-" + ii + '"]');
+        if (!e) return;
+        e.textContent = "";
+        e.appendChild(el("b", null, fmt(x.s) + "〜" + fmt(x.e)));
+        e.appendChild(document.createTextNode(ii > 0 ? "(前に転換" + x.g + "分" + (x.fixed ? "・時刻の指定あり" : "") + ")" : (x.fixed ? "(時刻の指定あり)" : "")));
+      });
+    });
+  }
+
+  // ===== 設定 =====
+  function settings() {
+    var s = {
+      title: oneLine($("in-title").value, 30),
+      date: /^\d{4}-\d{2}-\d{2}$/.test($("in-date").value) ? $("in-date").value : "",
+      venue: oneLine($("in-venue").value, 24),
+      open: parseTime($("in-open").value),
+      gap: clampInt($("in-gap").value, 10, 0, 120),
+      note: oneLine($("in-note").value, 60),
+      theme: THEMES[$("in-theme").value] ? $("in-theme").value : "night",
+      size: SIZES[$("in-size").value] ? $("in-size").value : "post",
+      style: $("in-style").value === "grid" ? "grid" : "list",
+      timefmt: $("in-timefmt").value === "start" ? "start" : "range",
+      accent: null, bg: null
+    };
+    return extendSettings(s);
+  }
+
+  // ===== 描く(canvas) =====
+  function lum(hex) {
+    var v = parseInt(hex.slice(1), 16), ch = [v >> 16 & 255, v >> 8 & 255, v & 255].map(function (x) { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); });
+    return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
+  }
+  function fpx(ctx) { var m = /([\d.]+)px/.exec(ctx.font); return m ? parseFloat(m[1]) : 16; }
+  function setFont(ctx, px) { ctx.font = "bold " + Math.max(1, Math.floor(px)) + "px " + FONT; }
+  function ellipsis(ctx, text, maxW) {
+    if (ctx.measureText(text).width <= maxW) return text;
+    var a = Array.from(text);
+    while (a.length > 1 && ctx.measureText(a.join("") + "…").width > maxW) a.pop();
+    return a.join("") + "…";
+  }
+  // 入る大きさまで縮める(minPxまで)。それでも入らなければ…で切る
+  function fitFont(ctx, text, maxW, px, minPx) {
+    px = Math.floor(px); setFont(ctx, px);
+    while (px > minPx && ctx.measureText(text).width > maxW) { px -= 1; setFont(ctx, px); }
+    return ellipsis(ctx, text, maxW);
+  }
+  function wrap2(ctx, text, maxW) {
+    var a = Array.from(text), l1 = "";
+    while (a.length && ctx.measureText(l1 + a[0]).width <= maxW) l1 += a.shift();
+    if (!a.length) return [l1];
+    return [l1, ellipsis(ctx, a.join(""), maxW)];
+  }
+  function dateText(d) {
+    if (!d) return "";
+    var p = d.split("-").map(Number), dt = new Date(p[0], p[1] - 1, p[2]);
+    return p[0] + "." + p[1] + "." + p[2] + " (" + "日月火水木金土".charAt(dt.getDay()) + ")";
+  }
+  function rrect(ctx, x, y, w, h, r) {
+    r = Math.max(0, Math.min(r, w / 2, h / 2));
+    ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  function themeOf(s) {
+    var th = Object.assign({}, THEMES[s.theme]);
+    if (s.accent) {
+      // 好きな差し色: 明るい色は黒の背景、暗い色は白の背景
+      th = Object.assign({}, lum(s.accent) > 0.3 ? THEMES.night : THEMES.white);
+      th.accent = s.accent;
+    }
+    th.onAccent = lum(th.accent) > 0.3 ? "#111111" : "#ffffff";
+    return th;
+  }
+
+  // 描いて、小さすぎる文字・省いた名前を info に返す
+  function draw(cv, s, list, info) {
+    var W = SIZES[s.size][0], H = SIZES[s.size][1];
+    var th = themeOf(s);
+    cv.width = W; cv.height = H;
+    var ctx = cv.getContext("2d");
+    if (!ctx) throw new Error("no canvas");
+    ctx.fillStyle = th.bg; ctx.fillRect(0, 0, W, H);
+    if (s.bg) {
+      var iw = s.bg.width, ih = s.bg.height, k = Math.max(W / iw, H / ih);
+      ctx.drawImage(s.bg, (W - iw * k) / 2, (H - ih * k) / 2, iw * k, ih * k);
+      ctx.globalAlpha = 0.78; ctx.fillStyle = th.bg; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
+    }
+    var u = W / 1080;                 // 1080幅を基準にした倍率
+    var story = s.size === "story";
+    var pad = 70 * u, x0 = pad, x1 = W - pad, cw = x1 - x0;
+    var y = (story ? 260 : 70) * u;
+    ctx.textBaseline = "alphabetic"; ctx.textAlign = "left";
+
+    // 見出し
+    ctx.fillStyle = th.accent; ctx.fillRect(x0, y, 90 * u, 10 * u); y += 28 * u;
+    var tt = fitFont(ctx, s.title || "TIME TABLE", cw, 78 * u, 34 * u);
+    y += fpx(ctx); ctx.fillStyle = th.fg; ctx.fillText(tt, x0, y);
+    var meta = [dateText(s.date), s.venue].filter(Boolean).join("  @ ");
+    if (meta) { y += 22 * u; var mt = fitFont(ctx, meta, cw, 36 * u, 20 * u); y += fpx(ctx); ctx.fillStyle = th.sub; ctx.fillText(mt, x0, y); }
+    var starts = list.map(function (x) { return x.sch.length ? x.sch[0].s : null; }).filter(function (v) { return v != null; });
+    var os = [];
+    if (s.open != null) os.push("OPEN " + fmt(s.open));
+    if (starts.length) os.push("START " + fmt(Math.min.apply(null, starts)));
+    if (os.length) { y += 16 * u; var ot = fitFont(ctx, os.join(" / "), cw, 40 * u, 22 * u); y += fpx(ctx); ctx.fillStyle = th.accent; ctx.fillText(ot, x0, y); }
+    y += 30 * u;
+    ctx.fillStyle = th.line; ctx.fillRect(x0, y, cw, 2 * u); y += 26 * u;
+
+    // 下の文字
+    var bottom = H - (story ? 260 : 60) * u;
+    if (s.note) {
+      setFont(ctx, 30 * u);
+      var lines = wrap2(ctx, s.note, cw), lh = 42 * u;
+      var ny = bottom - (lines.length - 1) * lh;
+      ctx.fillStyle = th.sub;
+      lines.forEach(function (l, i) { ctx.fillText(l, x0, ny + i * lh); });
+      bottom = ny - 60 * u;
+      ctx.fillStyle = th.line; ctx.fillRect(x0, bottom + 18 * u, cw, 2 * u);
+    }
+
+    var area = { x: x0, y: y, w: cw, h: Math.max(bottom - y, 60 * u) };
+    info.minPx = 999 * u; info.hidden = 0; info.u = u;
+    if (s.style === "grid") drawGrid(ctx, s, list, area, th, u, info); else drawList(ctx, s, list, area, th, u, info);
+    return cv;
+  }
+
+  function timeLabel(s, x) { return s.timefmt === "start" ? fmt(x.s) : fmt(x.s) + "〜" + fmt(x.e); }
+
+  function drawList(ctx, s, list, a, th, u, info) {
+    var multi = list.length > 1, rows = 0;
+    list.forEach(function (x) { rows += x.sch.length + (multi ? 1 : 0); });
+    if (!rows) return;
+    var rh = Math.min(a.h / rows, 140 * u), y = a.y + (a.h - rh * rows) / 2;
+    var namePx = Math.min(rh * 0.46, 60 * u), timePx = Math.min(rh * 0.36, 42 * u);
+    info.minPx = Math.min(info.minPx, namePx);
+    setFont(ctx, timePx);
+    var tw = ctx.measureText(s.timefmt === "start" ? "88:88" : "88:88〜88:88").width + 30 * u;
+    list.forEach(function (x) {
+      if (multi) {
+        ctx.fillStyle = th.accent;
+        var sl = fitFont(ctx, x.name || "STAGE", a.w, rh * 0.5, 14 * u);
+        ctx.fillText(sl, a.x, y + rh * 0.68); y += rh;
+      }
+      x.sch.forEach(function (it, i) {
+        if (i % 2 === 0) { ctx.fillStyle = th.band; rrect(ctx, a.x - 14 * u, y + rh * 0.06, a.w + 28 * u, rh * 0.88, 10 * u); ctx.fill(); }
+        ctx.fillStyle = th.accent; setFont(ctx, timePx);
+        ctx.fillText(timeLabel(s, it), a.x, y + rh / 2 + timePx * 0.36);
+        ctx.fillStyle = th.fg;
+        var maxW = a.w - tw, name = it.n || "";
+        var px = namePx; setFont(ctx, px);
+        while (px > namePx * 0.75 && ctx.measureText(name).width > maxW) { px -= 1; setFont(ctx, px); }
+        if (ctx.measureText(name).width <= maxW) { ctx.fillText(name, a.x + tw, y + rh / 2 + px * 0.36); }
+        else {
+          var p2 = Math.min(namePx * 0.8, rh * 0.38);
+          setFont(ctx, p2);
+          var ls = wrap2(ctx, name, maxW);
+          if (rh >= p2 * 2.3) { ctx.fillText(ls[0], a.x + tw, y + rh / 2 - p2 * 0.18); ctx.fillText(ls[1] || "", a.x + tw, y + rh / 2 + p2 * 0.98); }
+          else { setFont(ctx, px); ctx.fillText(ellipsis(ctx, name, maxW), a.x + tw, y + rh / 2 + px * 0.36); }
+        }
+        y += rh;
+      });
+    });
+  }
+
+  function drawGrid(ctx, s, list, a, th, u, info) {
+    var all = []; list.forEach(function (x) { x.sch.forEach(function (it) { all.push(it); }); });
+    if (!all.length) return;
+    var t0 = Math.floor(Math.min.apply(null, all.map(function (x) { return x.s; })) / 30) * 30;
+    var t1 = Math.ceil(Math.max.apply(null, all.map(function (x) { return x.e; })) / 30) * 30;
+    if (t1 <= t0) t1 = t0 + 30;
+    var axisW = 120 * u, headH = list.length > 1 || list[0].name ? 64 * u : 0;
+    var gx = a.x + axisW, gw = a.w - axisW, gy = a.y + headH, gh = a.h - headH;
+    var colW = gw / list.length, gapX = 10 * u;
+    function Y(t) { return gy + (t - t0) / (t1 - t0) * gh; }
+    var perMin = gh / (t1 - t0), step = 30;
+    while (step * perMin < 44 * u && step < 240) step *= 2;
+    setFont(ctx, 28 * u);
+    for (var t = t0; t <= t1; t += step) {
+      ctx.fillStyle = th.line; ctx.fillRect(gx, Y(t), gw, 2 * u);
+      ctx.fillStyle = th.sub; setFont(ctx, 28 * u); ctx.fillText(fmt(t), a.x, Y(t) + 10 * u);
+    }
+    // 名前の大きさは全部の枠でそろえる
+    var w = colW - gapX, inner = w - 30 * u;
+    var px = Math.min(40 * u, w * 0.13);
+    var tpx = Math.min(px * 0.68, 28 * u);
+    list.forEach(function (x, ci) {
+      var cx = gx + ci * colW + gapX / 2;
+      if (headH) {
+        ctx.fillStyle = th.accent; rrect(ctx, cx, a.y, w, headH - 12 * u, 10 * u); ctx.fill();
+        ctx.fillStyle = th.onAccent;
+        var hn = fitFont(ctx, x.name || "STAGE " + (ci + 1), w - 20 * u, 32 * u, 14 * u);
+        ctx.textAlign = "center"; ctx.fillText(hn, cx + w / 2, a.y + (headH - 12 * u) / 2 + fpx(ctx) * 0.36); ctx.textAlign = "left";
+      }
+      x.sch.forEach(function (it) {
+        var by = Y(it.s), bh = Math.max(Y(it.e) - by, 4 * u);
+        // 時刻の線が透けないように、背景の色で塗ってから枠を描く
+        ctx.fillStyle = th.bg; rrect(ctx, cx, by + 2 * u, w, bh - 4 * u, 10 * u); ctx.fill();
+        ctx.fillStyle = th.band; rrect(ctx, cx, by + 2 * u, w, bh - 4 * u, 10 * u); ctx.fill();
+        ctx.fillStyle = th.accent; ctx.fillRect(cx, by + 2 * u, 8 * u, bh - 4 * u);
+        var p = px;
+        if (bh < p * 1.3) p = (bh - 4 * u) * 0.72;
+        if (p < 14 * u) { info.hidden++; return; }
+        info.minPx = Math.min(info.minPx, p);
+        var showTime = bh > p * 1.3 + tpx * 1.4;
+        ctx.fillStyle = th.fg;
+        var nt = fitFont(ctx, it.n || "", inner, p, Math.min(p, 14 * u)), npx = fpx(ctx);
+        var blockH = npx + (showTime ? tpx + 8 * u : 0), ty = by + (bh - blockH) / 2 + npx * 0.86;
+        ctx.fillText(nt, cx + 20 * u, ty);
+        if (showTime) { ctx.fillStyle = th.sub; setFont(ctx, tpx); ctx.fillText(timeLabel(s, it), cx + 20 * u, ty + tpx + 8 * u); }
+      });
+    });
+  }
+
+  // ===== 画面 =====
+  var last = null, rTimer = null, pTimer = null;
+  var pvCv = document.createElement("canvas");   // 見本用は1つを使い回す(スマホのメモリ対策)
+  function compute(warn) {
+    var s = settings(), base = baseTime();
+    var list = stages.map(function (st, si) { return { name: st.name, sch: schedule(st, s.gap, base, warn, si) }; });
+    return { s: s, list: list };
+  }
+  function render() {
+    rTimer = null;
+    var w = [];
+    var r = compute(w), s = r.s;
+    syncExtra(s); saveLast(); refreshTimes();
+    var info = {};
+    try { draw(pvCv, s, r.list, info); $("pvImg").src = pvCv.toDataURL("image/png"); setSt("st", ""); }
+    catch (e) { setSt("st", "見本の画像を作れませんでした(画像が大きすぎるか、メモリが足りない可能性があります)。", true); }
+    var n = 0; r.list.forEach(function (x) { n += x.sch.length; });
+    var ends = r.list.map(function (x) { return x.sch.length ? x.sch[x.sch.length - 1].e : null; }).filter(function (v) { return v != null; });
+    var starts = r.list.map(function (x) { return x.sch.length ? x.sch[0].s : null; }).filter(function (v) { return v != null; });
+    var msg = n ? "全部で" + n + "行・終わりの予定 " + fmt(Math.max.apply(null, ends)) + "。画像は" + SIZES[s.size][0] + "×" + SIZES[s.size][1] + "です。" : "②で出演者を入れてください。";
+    $("info").textContent = msg;
+    $("pvImg").alt = "タイムテーブルの見本。" + msg;
+    if (s.open != null && starts.length && s.open > Math.min.apply(null, starts)) w.push("開場(" + fmt(s.open) + ")が開演より後になっています。");
+    if (info.hidden) w.push("時間の短い枠" + info.hidden + "つは、名前が入らないので載せていません。大きさを「ストーリーズ」「A4」にするか、リストの形式にしてください。");
+    else if (n && info.minPx < 26 * (info.u || 1)) w.push("文字が小さく、スマホでは読みにくいです。大きさを「ストーリーズ」「A4」にするか、行を減らしてください。");
+    $("warn").textContent = w.length ? "⚠ " + w.join(" ") : "";
+    $("saveBtn").disabled = $("printBtn").disabled = !n;
+    last = { s: s, list: r.list, n: n };
+    // Ctrl+Pに備えて、少し待ってから印刷用の画像も作っておく
+    clearTimeout(pTimer); pTimer = setTimeout(buildPrint, 800);
+  }
+  function changed() { clearTimeout(rTimer); rTimer = setTimeout(render, 150); }
+  function flush() { if (rTimer) { clearTimeout(rTimer); render(); } }
+  function emptyNote() {
+    return last && last.list.some(function (x) { return x.sch.some(function (it) { return !it.n; }); }) ? "(名前が空の行があります)" : "";
+  }
+
+  $("saveBtn").addEventListener("click", function () {
+    flush(); if (!last || !last.n) return;
+    var s = last.s, cv = document.createElement("canvas");
+    try { draw(cv, s, last.list, {}); } catch (e) { setSt("st", "画像を作れませんでした。", true); return; }
+    cv.toBlob(function (b) {
+      cv.width = cv.height = 0;
+      if (!b) { setSt("st", "画像を作れませんでした。", true); return; }
+      var a = document.createElement("a"), u = URL.createObjectURL(b);
+      a.href = u; a.download = "timetable" + (s.date ? "_" + s.date.replace(/-/g, "") : "") + ".png";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(u); }, 4000);
+      setSt("st", "画像を保存しました(ダウンロードのフォルダ)。" + emptyNote());
+    }, "image/png");
+    track("timetable_save", { stages: last.list.length, items: last.n, style: s.style, size: s.size, bg: s.bg ? 1 : 0 });
+  });
+
+  function buildPrint() {
+    clearTimeout(pTimer); pTimer = null;
+    var area = $("printArea"); area.innerHTML = "";
+    if (!last || !last.n) return null;
+    var s = Object.assign({}, last.s, { size: "a4" }), cv = document.createElement("canvas");
+    try { draw(cv, s, last.list, {}); } catch (e) { return null; }
+    var im = el("img", { alt: "" }); im.src = cv.toDataURL("image/png");
+    cv.width = cv.height = 0;
+    area.appendChild(im);
+    return im;
+  }
+  $("printBtn").addEventListener("click", function () {
+    flush(); var im = buildPrint(); if (!im) return;
+    setSt("st", "印刷画面を開きました。用紙はA4・縦にしてください。" + emptyNote());
+    track("timetable_print", { stages: last.list.length, items: last.n, style: last.s.style, size: "a4", bg: last.s.bg ? 1 : 0 });
+    (im.decode ? im.decode().catch(function () {}) : Promise.resolve()).then(function () { setTimeout(function () { window.print(); }, 50); });
+  });
+  // Ctrl+Pで開いたとき用(入力の途中や作りかけなら、作り直す)
+  window.addEventListener("beforeprint", function () { if (rTimer || pTimer || !$("printArea").firstChild) { flush(); buildPrint(); } });
+
+  // ===== 設定の記憶(このブラウザだけ。画像は残さない) =====
+  var noSave = false;
+  function snapshot() {
+    var o = {};
+    document.querySelectorAll("[data-save]").forEach(function (e) { o[e.id] = e.type === "checkbox" ? e.checked : e.value; });
+    o.stages = stages;
+    return o;
+  }
+  function applySnap(o) {
+    if (!o || typeof o !== "object") return;
+    document.querySelectorAll("[data-save]").forEach(function (e) {
+      if (e.type === "checkbox") { if (typeof o[e.id] === "boolean") e.checked = o[e.id]; return; }
+      if (typeof o[e.id] !== "string") return;
+      var v = o[e.id].slice(0, e.maxLength > 0 ? e.maxLength : 16);
+      if (e.tagName === "SELECT" && ![].some.call(e.options, function (op) { return op.value === v; })) return;
+      if (e.type === "color" && !/^#[0-9a-f]{6}$/i.test(v)) return;
+      if (e.type === "number" && !isFinite(Number(v))) return;
+      if (e.type === "time" && v !== "" && parseTime(v) == null) return;
+      if (e.type === "date" && v !== "" && !/^\d{4}-\d{2}-\d{2}$/.test(v)) return;
+      e.value = v;
+    });
+    if (o.stages) stages = cleanStages(o.stages);
+  }
+  function saveNow() { if (noSave) return; try { localStorage.setItem(LAST_KEY, JSON.stringify(snapshot())); } catch (e) {} }
+  var saveTimer = null;
+  function saveLast() { clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 300); }
+  window.addEventListener("pagehide", function () { if (rTimer) flush(); saveNow(); });
+
+  document.querySelectorAll("[data-save]").forEach(function (e) {
+    e.addEventListener(e.type === "text" || e.type === "number" || e.type === "color" || e.type === "time" || e.type === "date" ? "input" : "change", changed);
+    if (e.type === "number") e.addEventListener("change", function () { e.value = String(clampInt(e.value, Number(e.defaultValue), Number(e.min), Number(e.max))); changed(); });
+  });
+  $("in-gap").addEventListener("input", refreshTimes);
+  $("in-open").addEventListener("input", refreshTimes);
+
+  $("addStage").addEventListener("click", function () {
+    if (stages.length >= MAX_STAGES) {
+      setSt("itemSt", EDITION === "full" ? "ステージは" + MAX_STAGES + "つまでです。" : "無料版はステージ" + MAX_STAGES + "つまでです。買い切り版なら4つまで並べられます。", true);
+      return;
+    }
+    setSt("itemSt", "");
+    var prev = stages[stages.length - 1];
+    stages.push({ name: "", start: prev ? prev.start : "18:30", items: [{ n: "", m: 30, g: null, at: "" }] });
+    stages.forEach(function (st, i) { if (!st.name) st.name = "STAGE " + (i + 1); });
+    stagesUi({ si: stages.length - 1, ii: 0 }); changed();
+  });
+  $("resetAll").addEventListener("click", function () {
+    if (!window.confirm("入力した内容を全部消して、最初の状態に戻します。よろしいですか?")) return;
+    noSave = true;
+    try { localStorage.removeItem(LAST_KEY); } catch (e) {}
+    location.reload();
+  });
+
+  
+
+  try { applySnap(JSON.parse(localStorage.getItem(LAST_KEY) || "null")); } catch (e) {}
+  stages = cleanStages(stages);
+  if (EDITION !== "full") {
+    $("privacyNote").innerHTML = '入力した内容はどこにも送信されません(すべてこのブラウザの中で処理します)。このページでは利用状況の把握のためにアクセス解析(Google Analytics)を使っています。<a href="https://policies.google.com/technologies/partner-sites?hl=ja" target="_blank" rel="noopener">Googleによるデータの使用について</a>';
+  }
+  stagesUi();
+  render();
+})();
+</script>
+<!--UPSELL_JS_START-->
+<script>
+(function () {
+  "use strict";
+  var q = new URLSearchParams(location.search);
+  if (q.get("obs") === "1" || document.documentElement.classList.contains("obs")) return;
+  // 小さな案内(トースト)は、買い切り版がパソコン向けなので、マウス操作の広い画面でだけ出す
+  var pc = !!(window.matchMedia && matchMedia("(pointer:fine) and (min-width:720px)").matches);
+  var buy = document.getElementById("buyLink");
+  var pro = document.getElementById("pro-section");
+  if (!buy || !pro) return;
+  var FEATS = [], CALM = false;
+  var path = location.pathname.replace(/index\.html$/, "");
+  var KEY_CLOSED = "upsell_closed_until:" + path, KEY_SHOWN = "upsell_shown:" + path;
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+  function sess(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) { return null; } }
+  function gtagEv(name, p) { if (!window.dataLayer) return; (function () { window.dataLayer.push(arguments); })("event", name, p || {}); }
+
+  var shown = false;
+  function blocked() {
+    if (shown || sess(KEY_SHOWN) === "1") return true;
+    var until = Number(store(KEY_CLOSED) || 0);
+    return until && Date.now() < until;
+  }
+  function feats() {
+    if (FEATS.length) return FEATS;
+    var out = [];
+    var lis = pro.querySelectorAll(".feat-list li");
+    for (var i = 0; i < lis.length && out.length < 3; i++) {
+      var all = lis[i].textContent.replace(/\s+/g, " ").trim();
+      if (/スマホ|HTMLファイル|パソコンで使う/.test(all)) continue;
+      var st = lis[i].querySelectorAll("strong");
+      var t = st.length === 1 ? st[0].textContent : all.split(/[::。]/)[0];
+      t = t.replace(/[((][^()()]*[))]/g, "").replace(/\s+/g, " ").trim();
+      if (t.length > 40) t = t.slice(0, 39) + "…";
+      if (t) out.push(t);
+    }
+    return out;
+  }
+  // 「〜してください」「できません」など、失敗の表示が出ていたら案内しない
+  function failed() {
+    var els = document.querySelectorAll('[role="status"], [role="alert"], [aria-live]');
+    for (var i = 0; i < els.length; i++) {
+      if (pro.contains(els[i]) || !els[i].offsetParent) continue;
+      if (/ください|できません|できませんでした|失敗|ありません|エラー/.test(els[i].textContent)) return true;
+    }
+    return false;
+  }
+  function proVisible() {
+    var r = pro.getBoundingClientRect();
+    return r.top < innerHeight && r.bottom > 0;
+  }
+  function show(trigger) {
+    if (!pc || blocked() || (trigger === "action" && failed()) || proVisible()) return;
+    var list = feats();
+    if (!list.length) return;
+    shown = true;
+    sess(KEY_SHOWN, "1");
+    var box = document.createElement("aside");
+    box.className = "upsell-toast" + (CALM ? " upsell-calm" : "");
+    box.setAttribute("aria-label", "買い切り版のご案内");
+    box.setAttribute("aria-live", "polite");
+    document.body.appendChild(box);
+    var p = document.createElement("p");
+    p.textContent = trigger === "limit" && CALM ? "件数が多いときは、パソコン用の買い切り版(¥100・税込)で続けられます:"
+      : trigger === "limit"
+      ? "この先は買い切り版の機能です。パソコン用の買い切り版(¥100・税込)なら:"
+      : CALM ? "件数が多いときや、香典返しの準備をまとめたいときのために、パソコン用の買い切り版(¥100・税込)もあります:" : "うまくできましたか? パソコン用の買い切り版(¥100・税込)なら、さらに:";
+    var ul = document.createElement("ul");
+    list.forEach(function (t) { var li = document.createElement("li"); li.textContent = t; ul.appendChild(li); });
+    var a = document.createElement("a");
+    a.className = "upsell-go";
+    a.id = "upsellToastLink";
+    a.href = buy.href;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.textContent = "BOOTHで見る(新しいタブ)";
+    var bg = getComputedStyle(buy).backgroundColor;
+    if (bg && !/rgba?\(0, 0, 0, 0\)|transparent/.test(bg)) a.style.background = bg;
+    var x = document.createElement("button");
+    x.type = "button";
+    x.className = "upsell-x";
+    x.setAttribute("aria-label", "この案内を閉じる");
+    x.textContent = "×";
+    function close(remember) {
+      if (box.parentNode) box.parentNode.removeChild(box);
+      document.removeEventListener("keydown", onKey);
+      if (remember) store(KEY_CLOSED, String(Date.now() + 7 * 864e5));
+    }
+    // Escはページ側の操作(選択解除など)にも使われるので、案内の中にフォーカスがある時だけ閉じる
+    function onKey(e) { if (e.key === "Escape" && box.contains(document.activeElement)) close(true); }
+    x.addEventListener("click", function () { close(true); });
+    a.addEventListener("click", function () { setTimeout(function () { close(false); }, 0); });
+    document.addEventListener("keydown", onKey);
+    setTimeout(function () {
+      var note = document.createElement("small");
+      note.className = "upsell-note";
+      note.textContent = "スマホではファイルを開けない機種があります";
+      box.appendChild(x); box.appendChild(p); box.appendChild(ul); box.appendChild(a); box.appendChild(note);
+    }, 50);
+    gtagEv("upsell_show", { trigger: trigger });
+  }
+
+  // 保存・コピー・印刷・書き出しを押した直後(結果を受け取れたタイミング)
+  var OK = /保存|コピー|印刷|書き出|ダウンロード|共有|PDF/;
+  var NG = /読み込|リセット|消|削除|このブラウザに保存|確認|イメージを見る|戻/;
+  document.addEventListener("click", function (e) {
+    var el = e.target && e.target.closest ? e.target.closest("button, a[download], input[type=button], input[type=submit]") : null;
+    if (!el || el.closest("#pro-section, .upsell-toast, #anshin")) return;
+    var label = (el.textContent || el.value || "").replace(/\s+/g, " ");
+    if (!OK.test(label) || NG.test(label)) return;
+    setTimeout(function () { show("action"); }, 1500);
+  }, true);
+
+  // 無料版の上限まわり
+  // (1) ページが出す「買い切り版」の一文に、購入欄へのリンクを足す(スマホでも)。🔒のタブは薄く表示されているので入れない
+  // (2) 案内(パソコンのみ)は、はっきりした合図のときだけ出す: 🔒のクリック・買い切り版にふれたalert・
+  //     初めて出た「〜まで/のみ/以降/入っていません」の上限の一文(計算のたびに出る誘導文や、同じ文の描き直しでは出さない)
+  var SKIP = "#pro-section, .upsell-toast, .upsell-top, #anshin, a, button, label, select, option, h1, h2, h3, .badge, header, footer, nav, textarea, pre, code, [contenteditable], svg";
+  var LIMIT = /まで|のみ|以降|入っていません/;
+  var seenText = {}, ready = false;
+  function goPro(e) {
+    if (e) e.preventDefault();
+    pro.setAttribute("tabindex", "-1");
+    pro.scrollIntoView({ behavior: "smooth", block: "start" });
+    pro.focus({ preventScroll: true });
+  }
+  function linkify(root, deep) {
+    var limitHit = false;
+    var els = root.matches("p, div, span, li") ? [root] : [];
+    if (deep) els = els.concat([].slice.call(root.querySelectorAll("p, div, span, li")));
+    els.forEach(function (el) {
+      if (el.closest(SKIP) || el.closest('[role="radio"], [role="option"], [role="tab"], [role="button"], [tabindex]:not([tabindex="-1"])') || el.querySelector("a, button, p, div, li, input, label")) return;
+      // 選択肢の「○○(買い切り版)」ではなく、文として買い切り版にふれている要素だけ
+      var own = "";
+      for (var n = el.firstChild; n; n = n.nodeType === 1 && n.className === "upsell-inline" ? null : n.nextSibling) if (n.nodeType === 3) own += n.nodeValue;
+      own = own.trim();
+      if (own.indexOf("買い切り版") < 0 || /[((]買い切り版[))]$/.test(own) || /^🔒/.test(own)) return;
+      var key = own.replace(/\d+/g, "#");
+      if (ready && !seenText[key] && LIMIT.test(own) && !el.closest(".teaser, #teaser, [id$=teaser], #tz")) limitHit = true;
+      seenText[key] = 1;
+      if (el.querySelector(".upsell-inline")) return;
+      var a = document.createElement("a");
+      a.className = "upsell-inline";
+      a.href = "#pro-section";
+      a.setAttribute("aria-label", "くわしく:買い切り版の説明へ移動");
+      a.textContent = "くわしく";
+      var ar = document.createElement("span");
+      ar.setAttribute("aria-hidden", "true");
+      ar.textContent = " ↓";
+      a.appendChild(ar);
+      a.addEventListener("click", goPro);
+      el.appendChild(document.createTextNode(" "));
+      el.appendChild(a);
+    });
+    return limitHit;
+  }
+  linkify(document.body, true);
+  setTimeout(function () { ready = true; }, 1500);
+  var topLink = document.querySelector("#upsellTop a");
+  if (topLink) topLink.addEventListener("click", goPro);
+  new MutationObserver(function (ms) {
+    // 変わったところだけを調べる(足された要素はその中も、文字の変更は親要素だけ)
+    var hit = false, done = new Set();
+    function check(t, deep) {
+      if (!t || t.nodeType !== 1 || done.has(t) || t.closest(".upsell-toast")) return;
+      done.add(t);
+      if (linkify(t, deep)) hit = true;
+    }
+    ms.forEach(function (m) {
+      if (m.type === "characterData") { check(m.target.parentNode, false); return; }
+      check(m.target, false);
+      for (var i = 0; i < m.addedNodes.length; i++) if (m.addedNodes[i].nodeType === 1) check(m.addedNodes[i], true);
+    });
+    if (hit) setTimeout(function () { show("limit"); }, 800);
+  }).observe(document.body, { childList: true, subtree: true, characterData: true });
+  document.addEventListener("click", function (e) {
+    var el = e.target && e.target.closest ? e.target.closest("button, div, span, li") : null;
+    var first = el && el.firstChild && el.firstChild.nodeType === 3 ? el.firstChild.nodeValue : "";
+    if (!/^\s*🔒/.test(first) || e.target.closest("#pro-section")) return;
+    if (pc) setTimeout(function () { show("limit"); }, 300); else goPro();
+  }, true);
+  var origAlert = window.alert;
+  window.alert = function (msg) {
+    var r = origAlert.apply(window, arguments);
+    if (/買い切り版/.test(String(msg))) setTimeout(function () { show("limit"); }, 300);
+    return r;
+  };
+})();
+</script>
+<!--UPSELL_JS_END-->
+</body>
+</html>
